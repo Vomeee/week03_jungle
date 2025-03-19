@@ -7,23 +7,24 @@ public class HW_Run : IPlayerState
 
     private HW_PlayerStateController controller;
     private InputSystem_Actions actions;
+    PlayerMoveManager playerMoveManager;
 
     public HW_Run(HW_PlayerStateController controller)
     {
         this.controller = controller;
         this.actions = controller.GetInputActions();
-
+        playerMoveManager = PlayerMoveManager.Instance;
     }
 
     [Header("Run Variables")]
     float maxRunSpeed = 80f;
     float runForce = 1000f;
-    float runJumpForce = 11000f;
+    float runJumpForce = 5500f;
 
     public void EnterState()
     {
         Debug.Log("Enter Run");
-        actions.Player.Crouch.canceled += ToWalkState;
+        actions.Player.Crouch.performed += ToWalkState;
         actions.Player.Attack.performed += ToDashState;
         actions.Player.Jump.performed += ToAirState;
     }
@@ -38,17 +39,22 @@ public class HW_Run : IPlayerState
         HW_PlayerStateController.Instance.ChangeState(new HW_Dash(controller));
     }
 
-    private void ToAirState(InputAction.CallbackContext context)
+    private void ToAirState(InputAction.CallbackContext context) //Ground To Air.
     {
-        PlayerMoveManager.Instance.MoveByImpulse(Vector3.up * runJumpForce);
-        HW_PlayerStateController.Instance.ChangeState(new HW_Air(controller));
+        if(!playerMoveManager.isJumped)
+        {
+            playerMoveManager.ManageJumpBool(true);
+            PlayerMoveManager.Instance.MoveByImpulse(Vector3.up * runJumpForce);
+            HW_PlayerStateController.Instance.ChangeState(new HW_Air(controller));
+        }
+
     }
 
     
     public void ExitState()
     {
         Debug.Log("Exit run");
-        actions.Player.Sprint.canceled -= ToWalkState;
+        actions.Player.Crouch.performed -= ToWalkState;
         actions.Player.Attack.performed -= ToDashState;
         actions.Player.Jump.performed -= ToAirState;
     }

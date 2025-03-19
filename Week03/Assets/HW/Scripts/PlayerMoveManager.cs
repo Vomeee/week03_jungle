@@ -17,6 +17,12 @@ public class PlayerMoveManager : MonoBehaviour
     //Actions.
     public Action onGroundedAction;
 
+    //MoveVariables.
+    public bool isJumped => _isJumped;
+    bool _isJumped;
+
+    float groundedTransitionTime = 0.1f;
+
 
     private void Awake()
     {
@@ -31,8 +37,8 @@ public class PlayerMoveManager : MonoBehaviour
         //Component √ ±‚»≠.
         capsuleCollider = GetComponent<CapsuleCollider>();
         rigidBody = GetComponent<Rigidbody>();
+        
 
-        //cameraTransform = Camera.main.transform;
     }
 
     private void Start()
@@ -76,9 +82,21 @@ public class PlayerMoveManager : MonoBehaviour
 
     private void OnCollisionEnter(Collision collision)
     {
-        if(collision.gameObject.CompareTag("Ground"))
+        if(isJumped && collision.gameObject.CompareTag("Ground"))
         {
-            onGroundedAction?.Invoke();
+            ManageJumpBool(false);
+            Invoke("OnGroundActionInvoker", groundedTransitionTime);
+            
         }
+    }
+
+    private void OnGroundActionInvoker()
+    {
+        onGroundedAction?.Invoke();
+    }
+
+    public void ManageJumpBool(bool _isJumped)
+    {
+        this._isJumped = _isJumped;
     }
 }

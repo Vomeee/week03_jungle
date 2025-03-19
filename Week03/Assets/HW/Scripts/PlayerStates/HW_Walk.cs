@@ -6,6 +6,7 @@ public class HW_Walk : IPlayerState
 {
     private HW_PlayerStateController controller;
     private InputSystem_Actions actions;
+    private PlayerMoveManager playerMoveManager;
     private Rigidbody rb;
 
     public HW_Walk(HW_PlayerStateController controller)
@@ -13,12 +14,13 @@ public class HW_Walk : IPlayerState
         this.controller = controller;
         this.actions = controller.GetInputActions();
         rb = PlayerMoveManager.Instance.GetComponent<Rigidbody>();
+        playerMoveManager = PlayerMoveManager.Instance;
     }
 
     [Header("Walk Variables")]
-    float walkForce = 300f;
-    float maxWalkSpeed = 10f;
-    float walkJumpForce = 10000f;
+    float walkForce = 500f;
+    float maxWalkSpeed = 15f;
+    float walkJumpForce = 5000f;
     float normalRotationSpeed = 5f; // 기본 회전 속도
     float fastRotationSpeed = 30f; // 빠른 뒤돌아보기 속도
     float fastRotationThreshold = 0.7f; // 뒤쪽 입력 감지 임계값 (약 90도)
@@ -33,8 +35,13 @@ public class HW_Walk : IPlayerState
 
     private void ToAirState(InputAction.CallbackContext context)
     {
-        PlayerMoveManager.Instance.MoveByImpulse(Vector3.up * walkJumpForce);
-        HW_PlayerStateController.Instance.ChangeState(new HW_Air(controller));
+        if(!playerMoveManager.isJumped)
+        {
+            playerMoveManager.ManageJumpBool(true);
+            PlayerMoveManager.Instance.MoveByImpulse(Vector3.up * walkJumpForce);
+            HW_PlayerStateController.Instance.ChangeState(new HW_Air(controller));
+        }
+
     }
 
     private void ToDashState(InputAction.CallbackContext context)

@@ -6,14 +6,16 @@ public class HW_Idle : IPlayerState
 {
     private HW_PlayerStateController controller;
     private InputSystem_Actions actions;
+    private PlayerMoveManager playerMoveManager;
 
     public HW_Idle(HW_PlayerStateController controller)
     {
         this.controller = controller;
         this.actions = controller.GetInputActions();
+        playerMoveManager = PlayerMoveManager.Instance;
     }
 
-    float idleJumpForce = 15000f;
+    float idleJumpForce = 4500f;
 
     public void EnterState()
     {
@@ -23,8 +25,13 @@ public class HW_Idle : IPlayerState
 
     private void ToAirState(InputAction.CallbackContext context)
     {
-        PlayerMoveManager.Instance.MoveByImpulse(Vector3.up * idleJumpForce);
-        HW_PlayerStateController.Instance.ChangeState(new HW_Air(controller));
+        if(!playerMoveManager.isJumped)
+        {
+            playerMoveManager.ManageJumpBool(true); //isJumped => True.
+            PlayerMoveManager.Instance.MoveByImpulse(Vector3.up * idleJumpForce); //Jump. 단차로인한 공중 이행을 일단 배려.
+            HW_PlayerStateController.Instance.ChangeState(new HW_Air(controller)); 
+        }
+
     }
 
     private void ToWalkState(InputAction.CallbackContext context)

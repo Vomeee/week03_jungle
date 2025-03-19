@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using UnityEngine;
 
 public class HW_Dash : IPlayerState
@@ -17,12 +18,17 @@ public class HW_Dash : IPlayerState
         playerMoveManager.onGroundedAction += ToRunState;
     }
 
-    float elapsedTimeFromDash = 0f;
-    float dashForce = 6000f; // 각도로 받는 점프력.
-    float dashAngleY = 15f; // 힘을 받는 각도.
+    float dashElapsedTime = 0f;
+    float dashTime = 0.3f;
+    float dashVelocity = 50f; // 각도로 받는 점프력.
+    float dashAngleY = 1f; // 힘을 받는 각도.
+    bool dashEnd = false;
+    Vector3 finalDashDirection;
 
     public void EnterState()
     {
+        playerMoveManager.ManageJumpBool(true);
+
         Vector2 moveVector = actions.Player.Move.ReadValue<Vector2>();
         if (moveVector.magnitude < 0.1f)
         {
@@ -41,22 +47,14 @@ public class HW_Dash : IPlayerState
         float yComponent = Mathf.Sin(dashAngleY * Mathf.Deg2Rad); // 약 0.2588
         Vector3 dashDirection = horizontalDirection; // 수평 방향 복사
         dashDirection.y = yComponent; // Y 성분을 양수로 고정
-        dashDirection = dashDirection.normalized;
-
-        // 디버깅
-        Debug.Log("Horizontal Direction: " + horizontalDirection);
-        Debug.Log("Dash Direction: " + dashDirection + ", Y Component: " + dashDirection.y);
-
-        // 대쉬 힘 적용
-        PlayerMoveManager.Instance.MoveByImpulse(dashDirection * dashForce);
-
-        elapsedTimeFromDash = 0f;
+        finalDashDirection = dashDirection.normalized;
 
     }
 
-    private void ToRunState()
+
+    private void ToRunState()    
     {
-        HW_PlayerStateController.Instance.ChangeState(new HW_Walk(controller));
+        HW_PlayerStateController.Instance.ChangeState(new HW_Run(controller));
     }
 
     public void ExitState()
@@ -66,6 +64,18 @@ public class HW_Dash : IPlayerState
 
     public void UpdateState()
     {
-        //throw new System.NotImplementedException();
+        if(!dashEnd && finalDashDirection != null)
+        {
+            dashElapsedTime += Time.deltaTime;
+
+            playerMoveManager.MoveByVelocity(finalDashDirection * dashVelocity); 
+
+            if(dashElapsedTime > dashTime)
+            {
+                dashEnd = true;
+            }
+        }
+
+
     }
 }

@@ -1,4 +1,6 @@
+using System;
 using UnityEngine;
+using UnityEngine.InputSystem;
 
 public class HW_Air : IPlayerState
 {
@@ -14,24 +16,43 @@ public class HW_Air : IPlayerState
         //지면 충돌 감지. Air -> Walk.
         playerMoveManager = PlayerMoveManager.Instance;
         playerMoveManager.onGroundedAction += ToWalkState;
+
     }
 
     float maxAirSpeed = 30f;
     float airForce = 350f;
 
-    private void ToWalkState()
+    private void ToWalkState() //OnGroundedAction이 트리거.
     {
         HW_PlayerStateController.Instance.ChangeState(new HW_Walk(controller));
     }
 
+
     public void EnterState()
     {
-        //throw new System.NotImplementedException();
+        playerMoveManager.ManageJumpBool(true); //점프한 상황.
+
+        //input action 초기화.
+        actions.Player.Attack.performed += ToAirDashState;
+        actions.Player.Crouch.performed += ToAirRunState;
     }
+
+    private void ToAirRunState(InputAction.CallbackContext context)
+    {
+        HW_PlayerStateController.Instance.ChangeState(new HW_AirRun(controller));
+    }
+
+    private void ToAirDashState(InputAction.CallbackContext context)
+    {
+        HW_PlayerStateController.Instance.ChangeState(new HW_AirDash(controller));
+    }
+
+   
 
     public void ExitState()
     {
-        //throw new System.NotImplementedException();
+        actions.Player.Attack.performed -= ToAirDashState;
+        actions.Player.Crouch.performed -= ToAirRunState;
     }
 
     public void UpdateState()
