@@ -44,6 +44,8 @@ public class PlayerMoveManager : MonoBehaviour
     private void Start()
     {
         actions = GetComponent<HW_PlayerStateController>().GetInputActions();
+        Physics.gravity = new Vector3(0, -20.0f, 0); // 기본값은 (0, -9.81, 0)
+        Cursor.visible = false;
     }
 
     public void MoveByForce(Vector3 force) //Walk. ETC

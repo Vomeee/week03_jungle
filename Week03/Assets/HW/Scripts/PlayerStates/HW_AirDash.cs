@@ -18,10 +18,13 @@ public class HW_AirDash : IPlayerState
     float airDashTime = 0.3f;
     float airDashVelocity = 50f; // 각도로 받는 점프력.
     float airDashAngleY = 3f; // 힘을 받는 각도.
-    float controlEnableTime = 1f;
+    float controlEnableTime = 0.6f;
     float elapsedControlEnableTime = 0;
+    float airDashEndForce = 10000f; //끝났을 때 역방향으로 받는 힘.
     bool airDashEnd = false;
     Vector3 finalAirDashDirection;
+
+    GameObject airDashParticle;
 
     public void EnterState()
     {
@@ -47,11 +50,12 @@ public class HW_AirDash : IPlayerState
         dashDirection.y = yComponent; // Y 성분을 양수로 고정
         finalAirDashDirection = dashDirection.normalized;
 
+        airDashParticle = GameObject.Instantiate((GameObject)Resources.Load("HW/Particle/DashParticle"), playerMoveManager.transform);
     }
 
     public void ExitState()
     {
-
+        GameObject.Destroy(airDashParticle);
     }
 
     public void UpdateState()
@@ -67,7 +71,10 @@ public class HW_AirDash : IPlayerState
             if (airDashElapsedTime > airDashTime)
             {
                 airDashEnd = true;
+                playerMoveManager.MoveByImpulse(-finalAirDashDirection * airDashEndForce);
             }
+
+            
         }
 
         if(elapsedControlEnableTime > controlEnableTime)

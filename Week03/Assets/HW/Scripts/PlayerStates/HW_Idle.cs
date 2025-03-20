@@ -1,4 +1,5 @@
 using System;
+using Unity.Cinemachine;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -7,6 +8,7 @@ public class HW_Idle : IPlayerState
     private HW_PlayerStateController controller;
     private InputSystem_Actions actions;
     private PlayerMoveManager playerMoveManager;
+    private Rigidbody rb;
 
     public HW_Idle(HW_PlayerStateController controller)
     {
@@ -19,6 +21,8 @@ public class HW_Idle : IPlayerState
 
     public void EnterState()
     {
+        
+
         actions.Player.Move.performed += ToWalkState; //움직임 -> Walk
         actions.Player.Jump.performed += ToAirState; //점프 -> Jump
     }
@@ -36,6 +40,8 @@ public class HW_Idle : IPlayerState
 
     private void ToWalkState(InputAction.CallbackContext context)
     {
+        playerMoveManager.GetComponent<CinemachineImpulseSource>().GenerateImpulse();
+
         HW_PlayerStateController.Instance.ChangeState(new HW_Walk(controller));
     }
 

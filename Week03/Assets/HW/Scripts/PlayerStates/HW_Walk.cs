@@ -1,4 +1,5 @@
 using System;
+using Unity.Cinemachine;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -18,11 +19,12 @@ public class HW_Walk : IPlayerState
     }
 
     [Header("Walk Variables")]
-    float walkForce = 500f;
-    float maxWalkSpeed = 15f;
+    float walkForce = 300f;
+    float initialWalkPower = 10f;
+    float maxWalkSpeed = 25f;
     float walkJumpForce = 5000f;
     float normalRotationSpeed = 5f; // 기본 회전 속도
-    float fastRotationSpeed = 30f; // 빠른 뒤돌아보기 속도
+    float fastRotationSpeed = 15f; // 빠른 뒤돌아보기 속도
     float fastRotationThreshold = 0.7f; // 뒤쪽 입력 감지 임계값 (약 90도)
 
     public void EnterState()

@@ -1,5 +1,6 @@
 using System;
 using System.Collections;
+using Unity.Cinemachine;
 using UnityEngine;
 
 public class HW_Dash : IPlayerState
@@ -19,14 +20,20 @@ public class HW_Dash : IPlayerState
     }
 
     float dashElapsedTime = 0f;
-    float dashTime = 0.3f;
-    float dashVelocity = 50f; // 각도로 받는 점프력.
-    float dashAngleY = 1f; // 힘을 받는 각도.
+    float dashTime = 0.23f;
+    float dashVelocity = 60f; // 각도로 받는 점프력.
+    float dashAngleY = 5f; // 힘을 받는 각도.
+    float dashEndForce = 10000f;
     bool dashEnd = false;
     Vector3 finalDashDirection;
 
+    GameObject DashParticle;
+
     public void EnterState()
     {
+        //Cinemachine camera impulse source 트리거.
+        playerMoveManager.GetComponent<CinemachineImpulseSource>().GenerateImpulse();
+
         playerMoveManager.ManageJumpBool(true);
 
         Vector2 moveVector = actions.Player.Move.ReadValue<Vector2>();
@@ -49,6 +56,9 @@ public class HW_Dash : IPlayerState
         dashDirection.y = yComponent; // Y 성분을 양수로 고정
         finalDashDirection = dashDirection.normalized;
 
+        rigidBody.MoveRotation(Quaternion.LookRotation(finalDashDirection));
+
+        DashParticle = GameObject.Instantiate((GameObject)Resources.Load("HW/Particle/DashParticle"), playerMoveManager.transform);
     }
 
 
@@ -60,6 +70,8 @@ public class HW_Dash : IPlayerState
     public void ExitState()
     {
         //throw new System.NotImplementedException();
+
+        GameObject.Destroy(DashParticle);
     }
 
     public void UpdateState()
@@ -73,6 +85,7 @@ public class HW_Dash : IPlayerState
             if(dashElapsedTime > dashTime)
             {
                 dashEnd = true;
+                playerMoveManager.MoveByImpulse(-finalDashDirection * dashEndForce);
             }
         }
 

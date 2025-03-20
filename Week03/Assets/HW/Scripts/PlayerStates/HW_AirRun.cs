@@ -6,20 +6,26 @@ public class HW_AirRun : IPlayerState
 {
     private HW_PlayerStateController controller;
     private InputSystem_Actions actions;
+    private PlayerMoveManager playerMoveManager;
 
     public HW_AirRun(HW_PlayerStateController controller)
     {
         this.controller = controller;
         this.actions = controller.GetInputActions();
+        playerMoveManager = PlayerMoveManager.Instance;
     }
 
     [Header("Run Variables")]
     float maxAirRunSpeed = 80f;
     float airRunForce = 1000f;
 
+    GameObject airRunParticle = null;
+
     public void EnterState()
     {
         actions.Player.Attack.performed += ToAirDashState;
+
+        airRunParticle = GameObject.Instantiate((GameObject)Resources.Load("HW/Particle/GroundSweepParticle"), playerMoveManager.gameObject.transform);
     }
 
     private void ToAirDashState(InputAction.CallbackContext context)
@@ -30,6 +36,8 @@ public class HW_AirRun : IPlayerState
     public void ExitState()
     {
         actions.Player.Attack.performed -= ToAirDashState;
+
+        GameObject.Destroy(airRunParticle, 0.2f);
     }
 
     public void UpdateState()

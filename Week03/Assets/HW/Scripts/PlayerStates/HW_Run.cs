@@ -17,9 +17,12 @@ public class HW_Run : IPlayerState
     }
 
     [Header("Run Variables")]
-    float maxRunSpeed = 80f;
+    float maxRunSpeed = 70f;
     float runForce = 1000f;
     float runJumpForce = 5500f;
+
+    [Header("Particle")]
+    GameObject groundSweepParticle = null;
 
     public void EnterState()
     {
@@ -27,6 +30,9 @@ public class HW_Run : IPlayerState
         actions.Player.Crouch.performed += ToWalkState;
         actions.Player.Attack.performed += ToDashState;
         actions.Player.Jump.performed += ToAirState;
+
+        //Spawn particle
+        groundSweepParticle = GameObject.Instantiate((GameObject)Resources.Load("HW/Particle/GroundSweepParticle"), playerMoveManager.gameObject.transform);
     }
 
     private void ToWalkState(InputAction.CallbackContext context)
@@ -57,6 +63,8 @@ public class HW_Run : IPlayerState
         actions.Player.Crouch.performed -= ToWalkState;
         actions.Player.Attack.performed -= ToDashState;
         actions.Player.Jump.performed -= ToAirState;
+
+        GameObject.Destroy(groundSweepParticle, 0.3f);
     }
 
     public void UpdateState()
